@@ -82,14 +82,13 @@ int path_find(struct map *map, struct path **path) {
     } while (0);
 
     size_t node_cnt = map->header.width * map->header.height;
-    double *dist = calloc(node_cnt, sizeof(double));
+    double dist[node_cnt];
+    struct point prev[node_cnt];
+    struct ordered_set unvisited;
+
+    call(ordered_set_init, &unvisited);
 
     dist[map->path_start.x + (map->path_start.y * map->header.width)] = 0;
-
-    struct point *prev = calloc(node_cnt, sizeof(struct point));
-
-    struct ordered_set unvisited;
-    call(ordered_set_init, &unvisited);
 
     for (int y = 0; y < map->header.height; ++y) {
         for (int x = 0; x < map->header.width; ++x) {
@@ -116,7 +115,6 @@ int path_find(struct map *map, struct path **path) {
 
     while (unvisited.size > 0) {
         call(ordered_set_remove_min, &unvisited, &p);
-        memset(neighbors, 0, sizeof(struct point) * 8);
         neighbor_cnt = 0;
 
         if (p.x > 0) {
@@ -173,8 +171,6 @@ int path_find(struct map *map, struct path **path) {
     path_reverse(path);
 
     call(ordered_set_release, &unvisited);
-    free(dist);
-    free(prev);
 
     #undef call
     return 0;

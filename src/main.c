@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
 #include "map.h"
 #include "path.h"
@@ -20,6 +21,7 @@ void read_map(char *filename, struct map *map) {
 
     if (error) {
         fprintf(stderr, "Error parsing map: %s\n", map_error_str(error));
+        perror("errno");
         exit(EXIT_FAILURE);
         return;
     }
@@ -74,11 +76,11 @@ int main(int argc, char *argv[]) {
 
     if (error) {
         printf(" error calculating path!\n");
-        return EXIT_FAILURE;
+        goto exit;
     }
     
     time_duration = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf(" done! took %.02f seconds.\n", time_duration);
+    printf(" done! took %.04f seconds.\n", time_duration);
 
     struct path *p = path->next;
     while (p != NULL) {
@@ -88,6 +90,7 @@ int main(int argc, char *argv[]) {
     map.tiles[map.path_end.y][map.path_end.x] = map.header.end_ch;
     write_map(argv[2], &map);
 
+exit:
     map_free(&map);
     path_free(path);
     return 0;

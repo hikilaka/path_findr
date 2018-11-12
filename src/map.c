@@ -130,6 +130,7 @@ int read_map_header(FILE *file, struct map_header *header) {
     }
 
     if (ferror(file)) {
+        perror("error: ");
         return map_read_error;
     }
 
@@ -146,7 +147,11 @@ int read_map_body(FILE *file, struct map *map) {
         char *read = fgets(line_buf, 256, file);
 
         if (read == NULL) {
-            return map_read_error;
+            if (feof(file)) {
+                return map_ok;
+            } else {
+                return map_read_error;
+            }
         }
 
         int line_len = strlen(line_buf);
